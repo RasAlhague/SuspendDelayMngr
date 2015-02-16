@@ -14,11 +14,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#Every 5 minutes by default
-CHECK_DELAY=300
+
+#Check for full screen window every 1 minutes by default
+CHECK_DELAY=60
 
 if [[ $1 ]]; then
+
+	if [[ "$1" == "--help" ]]; then
+		echo "Usage: SuspendDelayMngr.sh [CHECK_DELAY] [SCREENSERVER_TIMEOUT]"
+		echo "Defaults: CHECK_DELAY = 60"
+		echo "SCREENSERVER_TIMEOUT = 300"
+
+		exit
+	fi
+
 	CHECK_DELAY=$1
+
+fi
+
+#Off screen after 5 minutes by default
+SCREENSERVER_TIMEOUT=300
+
+if [[ $2 ]]; then
+	SCREENSERVER_TIMEOUT=$2
 fi
 
 checkForFullScreenWindows()
@@ -79,17 +97,23 @@ do
 		echo "Window with _NET_WM_STATE_FULLSCREEN has been found:"
 		echo "$(wmctrl -l | grep "${WINDOWS_IDS_ARRAY[i]}")"
 		echo "Deactivating xfce4-power-manager..."
+		echo "xset s off..."
 		echo
 
 		xfce4-power-manager --quit
+		xset s off
 	fi
 
 	if [[ ( $IS_FS_WINDOW_EXIST -ne 0 ) && ( $IS_PM_RUNNING -ne 0 ) ]]
 	then
 		echo "Activating xfce4-power-manager..."
+		echo "xset s on..."
+		echo "xset s" $SCREENSERVER_TIMEOUT"..."
 		echo
 		
 		xfce4-power-manager
+		xset s on
+		xset s $SCREENSERVER_TIMEOUT
 	fi
 
 
